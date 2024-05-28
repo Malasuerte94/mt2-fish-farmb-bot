@@ -108,7 +108,7 @@ class FishBot(Thread):
 
     def use_bait_or_fish(self):
         screenshot = take_screenshot(self.game_window)
-        if self.detect_image(screenshot, 'momeala'):
+        if self.detect_image(screenshot, 'momeala', 0.9):
             print("Found fish bait")
             self.use_item('momeala')
         else:
@@ -134,7 +134,6 @@ class FishBot(Thread):
             self.handle_purchase_sequence()
 
     def handle_purchase_sequence(self):
-        window_left, window_top = self.game_window.left, self.game_window.top
         self.click_image('fisherman', 'left')
 
         if self.detect_image(take_screenshot(self.game_window), 'buy'):
@@ -153,7 +152,7 @@ class FishBot(Thread):
 
     def open_fish(self):
         def process_open_fish(template_name):
-            while self.detect_image(take_screenshot(self.game_window), template_name):
+            while self.detect_image(take_screenshot(self.game_window), template_name, 0.9):
                 self.click_image(template_name, 'right')
                 time.sleep(0.1)
 
