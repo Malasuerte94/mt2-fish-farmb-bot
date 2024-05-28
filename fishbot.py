@@ -135,13 +135,16 @@ class FishBot(Thread):
 
     def handle_purchase_sequence(self):
         self.click_image('fisherman', 'left')
-
+        time.sleep(1)
         if self.detect_image(take_screenshot(self.game_window), 'buy'):
             self.click_image('buy', 'left')
+            time.sleep(1)
             if self.detect_image(take_screenshot(self.game_window), 'yes'):
                 self.click_image('yes', 'left')
+                time.sleep(1)
                 if self.detect_image(take_screenshot(self.game_window), 'ok'):
                     self.click_image('ok', 'left')
+                    time.sleep(1)
                     self.use_item('pasta')
                 else:
                     self.use_item('pasta')
