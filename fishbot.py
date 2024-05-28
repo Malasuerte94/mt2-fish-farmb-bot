@@ -26,7 +26,7 @@ class FishBot(Thread):
         self.game_window = focus_game_window(self.window_title)
         self.images = {
             'fish': cv2.imread('images/fish.png'),
-            'momeala': cv2.imread('images/momeala.png'),
+            'small_fish': cv2.imread('images/small_fish.png'),
             'fisherman': cv2.imread('images/pescar.png'),
             'buy': cv2.imread('images/buy.png'),
             'yes': cv2.imread('images/yes.png'),
@@ -108,12 +108,12 @@ class FishBot(Thread):
 
     def use_bait_or_fish(self):
         screenshot = take_screenshot(self.game_window)
-        if self.detect_image(screenshot, 'momeala', 0.9):
+        if self.detect_image(screenshot, 'small_fish', 0.9):
             print("Found fish bait")
-            self.use_item('momeala')
+            self.use_item('small_fish')
         else:
             screenshot = take_screenshot(self.game_window)
-            if self.detect_image(screenshot, 'pasta'):
+            if self.detect_image(screenshot, 'pasta', 0.9):
                 print("Found bait")
                 self.use_item('pasta')
             else:
