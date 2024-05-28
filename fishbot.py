@@ -34,7 +34,9 @@ class FishBot(Thread):
             'pasta': cv2.imread('images/pasta.png'),
             'open1': cv2.imread('images/open1.png'),
             'open2': cv2.imread('images/open2.png'),
-            'open3': cv2.imread('images/open3.png')
+            'open3': cv2.imread('images/open3.png'),
+            'open4': cv2.imread('images/open4.png'),
+            'open5': cv2.imread('images/open5.png')
         }
         self.locations = {}
         self.fishing_wait = 2.3
@@ -172,6 +174,8 @@ class FishBot(Thread):
         process_open_fish('open1')
         process_open_fish('open2')
         process_open_fish('open3')
+        process_open_fish('open4')
+        process_open_fish('open5')
 
         print('All fish processed')
 
