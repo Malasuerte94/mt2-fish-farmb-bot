@@ -128,7 +128,6 @@ class FishBot(Thread):
 
     def refuel(self):
         self.open_fish()
-        window_left, window_top = self.game_window.left, self.game_window.top
         screenshot = take_screenshot(self.game_window)
         if self.detect_image(screenshot, 'fisherman'):
             self.handle_purchase_sequence()
@@ -145,9 +144,20 @@ class FishBot(Thread):
                 if self.detect_image(take_screenshot(self.game_window), 'ok'):
                     self.click_image('ok', 'left')
                     time.sleep(1)
-                    self.use_item('pasta')
+
+                    screenshot = take_screenshot(self.game_window)
+                    if self.detect_image(screenshot, 'pasta', 0.9):
+                        print("Found bait")
+                        self.use_item('pasta')
+                    else:
+                        print('We have a problem!')
                 else:
-                    self.use_item('pasta')
+                    screenshot = take_screenshot(self.game_window)
+                    if self.detect_image(screenshot, 'pasta', 0.9):
+                        print("Found bait")
+                        self.use_item('pasta')
+                    else:
+                        print('We have a problem!')
             else:
                 print('Yes, not detected')
         else:
