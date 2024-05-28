@@ -108,7 +108,7 @@ class FishBot(Thread):
 
     def use_bait_or_fish(self):
         screenshot = take_screenshot(self.game_window)
-        if self.detect_image(screenshot, 'small_fish', 0.9):
+        if self.detect_image(screenshot, 'small_fish', 0.8):
             print("Found fish bait")
             self.use_item('small_fish')
         else:
