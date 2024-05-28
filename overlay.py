@@ -11,7 +11,7 @@ class MapSelectorOverlay:
         self.set_map_region = set_map_region
 
         # Load the map.png image
-        self.map_image = Image.open("map.png").convert("RGBA")  # Ensure transparency
+        self.map_image = Image.open("images/map.png").convert("RGBA")  # Ensure transparency
         self.map_photo = ImageTk.PhotoImage(self.map_image)
 
         # Create a label to display the map image

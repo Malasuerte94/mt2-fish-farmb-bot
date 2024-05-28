@@ -2,12 +2,12 @@ import cv2
 import numpy as np
 import time
 import pyautogui
-from pywinauto.mouse import move, click
-import pygetwindow as gw
+from pywinauto.mouse import click
 import random
 from pywinauto.keyboard import send_keys
 from threading import Thread, Event
 from bot_logic import focus_game_window, ps_fish, take_screenshot
+
 
 class FishBot(Thread):
     def __init__(self, window_title):
@@ -15,23 +15,23 @@ class FishBot(Thread):
         self.window_title = window_title
         self.stop_event = Event()
         self.game_window = focus_game_window(self.window_title)
-        self.fish_image = cv2.imread('fish.png')
-        self.momeala_image = cv2.imread('momeala.png')
-        self.fisherman = cv2.imread('pescar.png')
-        self.buy = cv2.imread('buy.png')
-        self.yes = cv2.imread('yes.png')
-        self.ok = cv2.imread('ok.png')
-        self.pasta = cv2.imread('pasta.png')
-        self.open1 = cv2.imread('open1.png')
-        self.open2 = cv2.imread('open2.png')
-        self.open3 = cv2.imread('open3.png')
+        self.fish_image = cv2.imread('images/fish.png')
+        self.momeala_image = cv2.imread('images/momeala.png')
+        self.fisherman = cv2.imread('images/pescar.png')
+        self.buy = cv2.imread('images/buy.png')
+        self.yes = cv2.imread('images/yes.png')
+        self.ok = cv2.imread('images/ok.png')
+        self.pasta = cv2.imread('images/pasta.png')
+        self.open1 = cv2.imread('images/open1.png')
+        self.open2 = cv2.imread('images/open2.png')
+        self.open3 = cv2.imread('images/open3.png')
         self.fishing_wait = 2.3
 
     def run(self):
         if not self.game_window:
             print(f"Could not find game window: {self.window_title}")
             return
-        
+
         self.press_f3_or_use_fish()
         self.press_space()
 
@@ -63,8 +63,6 @@ class FishBot(Thread):
         gray_fish = cv2.cvtColor(self.fish_image, cv2.COLOR_BGR2GRAY)
 
         best_match_val = float('-inf')
-        best_match_loc = None
-        best_match_scale = None
 
         min_scale = 0.2
         max_scale = 3.0
@@ -75,8 +73,6 @@ class FishBot(Thread):
             min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
             if max_val > best_match_val:
                 best_match_val = max_val
-                best_match_loc = max_loc
-                best_match_scale = scale
 
         threshold = 0.8
         return best_match_val >= threshold
@@ -85,7 +81,7 @@ class FishBot(Thread):
         time.sleep(self.fishing_wait)
         self.press_space()
         print("Finished fishing")
-    
+
     def press_f3_or_use_fish(self):
         window_left, window_top = self.game_window.left, self.game_window.top
         screenshot = take_screenshot(self.game_window)
@@ -117,8 +113,7 @@ class FishBot(Thread):
             return True
         else:
             return False
-        
-    
+
     def refuel(self):
         self.open_fish()
         window_left, window_top = self.game_window.left, self.game_window.top
@@ -169,6 +164,7 @@ class FishBot(Thread):
 
     def open_fish(self):
         window_left, window_top = self.game_window.left, self.game_window.top
+
         def process_open_fish(template):
             while True:
                 screenshot = take_screenshot(self.game_window)
@@ -177,9 +173,9 @@ class FishBot(Thread):
                     print(f'{template} detected')
                     x, y = open_location
                     click_pos = (window_left + x, window_top + y)
-                    pyautogui.moveTo(click_pos, duration=0.2)
+                    pyautogui.moveTo(click_pos, duration=0.1)
                     pyautogui.click(button='right')
-                    time.sleep(0.5)
+                    time.sleep(0.1)
                 else:
                     break
 
@@ -188,7 +184,6 @@ class FishBot(Thread):
         process_open_fish(self.open3)
 
         print('All fish processed')
-
 
     def use_bait(self):
         window_left, window_top = self.game_window.left, self.game_window.top
@@ -207,7 +202,6 @@ class FishBot(Thread):
         game_center_x = self.game_window.left + self.game_window.width // 2
         game_center_y = self.game_window.top + self.game_window.height // 2
         pyautogui.moveTo(game_center_x, game_center_y, 0.2)
-        
 
     def detect_bait(self, image):
         gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -222,7 +216,6 @@ class FishBot(Thread):
             return True
         else:
             return False
-        
 
     def detect_open_fish(self, image, template):
         gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -237,7 +230,6 @@ class FishBot(Thread):
         else:
             return None
 
-
     def detect_pescar(self, image):
         gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         gray_momeala = cv2.cvtColor(self.fisherman, cv2.COLOR_BGR2GRAY)
@@ -251,8 +243,7 @@ class FishBot(Thread):
             return True
         else:
             return False
-        
-    
+
     def detect_yes(self, image):
         gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         gray_momeala = cv2.cvtColor(self.yes, cv2.COLOR_BGR2GRAY)
@@ -267,7 +258,6 @@ class FishBot(Thread):
         else:
             return False
 
-
     def detect_buy(self, image):
         gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         gray_momeala = cv2.cvtColor(self.buy, cv2.COLOR_BGR2GRAY)
@@ -281,7 +271,7 @@ class FishBot(Thread):
             return True
         else:
             return False
-    
+
     def detect_ok(self, image):
         gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         gray_momeala = cv2.cvtColor(self.ok, cv2.COLOR_BGR2GRAY)
@@ -302,7 +292,6 @@ class FishBot(Thread):
         print(f"Hit F3")
         time.sleep(press_duration)
         send_keys('{F3 up}')
-    
 
     def use_fish(self):
         print("Used momeala")
