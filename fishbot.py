@@ -1,5 +1,7 @@
 import cv2
 import time
+
+import numpy as np
 import pyautogui
 from pywinauto.mouse import click
 import random
@@ -50,7 +52,7 @@ class FishBot(Thread):
 
         while not self.stop_event.is_set():
             screenshot = ps_fish(self.game_window)
-            if self.detect_image(screenshot, 'fish'):
+            if self.detect_fish(screenshot, 'fish'):
                 print("Fish detected")
                 self.fish_catch()
                 time.sleep(5)
@@ -59,7 +61,7 @@ class FishBot(Thread):
                 last_detection_time = time.time()
             else:
                 if time.time() - last_detection_time > detection_timeout:
-                    print("No fish detected for 10 seconds, restarting...")
+                    print("No fish detected for 30 seconds, restarting...")
                     last_detection_time = time.time()
                     self.use_bait_or_fish()
                     press_space()
@@ -67,6 +69,25 @@ class FishBot(Thread):
 
     def stop(self):
         self.stop_event.set()
+
+    def detect_fish(self, image, name):
+        gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        gray_fish = cv2.cvtColor(self.images[name], cv2.COLOR_BGR2GRAY)
+
+        best_match_val = float('-inf')
+
+        min_scale = 0.2
+        max_scale = 3.0
+
+        for scale in np.linspace(min_scale, max_scale, 20):
+            resized_fish = cv2.resize(gray_fish, None, fx=scale, fy=scale)
+            result = cv2.matchTemplate(gray_image, resized_fish, cv2.TM_CCOEFF_NORMED)
+            min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
+            if max_val > best_match_val:
+                best_match_val = max_val
+
+        threshold = 0.8
+        return best_match_val >= threshold
 
     def detect_image(self, image, name, threshold=0.8):
         gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)

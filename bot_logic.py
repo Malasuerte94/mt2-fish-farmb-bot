@@ -12,6 +12,7 @@ stop_event = Event()
 # Global variable to hold map region
 map_region = (1150, 50, 110, 110)
 
+
 def set_map_region(region, selected_window):
     global map_region
     map_region = region
@@ -48,6 +49,7 @@ def focus_game_window(window_title):
         print(f"Error occurred while getting window: {e}")
         return None
 
+
 def ps_fish(window):
     left, top, width, height = window.left, window.top, window.width, window.height
     center_y = top + height // 2
@@ -59,18 +61,21 @@ def ps_fish(window):
     # cv2.waitKey(0)
     # cv2.destroyAllWindows()
     # img = cv2.cvtColor(screenshot, cv2.COLOR_RGB2BGR)
-    return img    
+    return img
+
 
 def take_screenshot(window):
     left, top, width, height = window.left, window.top, window.width, window.height
     screenshot = np.array(ImageGrab.grab(bbox=(left, top, left + width, top + height)))
     img = cv2.cvtColor(screenshot, cv2.COLOR_RGB2BGR)
     return img
-    
+
+
 def set_setting(key, value):
     settings = load_settings()
     settings[key] = value
     save_settings(settings)
+
 
 def save_settings(settings):
     with open("settings.json", "r+") as file:
@@ -80,6 +85,7 @@ def save_settings(settings):
         json.dump(data, file, indent=4)
         file.truncate()
 
+
 def load_settings():
     try:
         with open("settings.json", "r") as file:
@@ -87,7 +93,7 @@ def load_settings():
     except (FileNotFoundError, json.JSONDecodeError):
         # If the file doesn't exist or is empty/invalid JSON, initialize with default settings
         settings = {
-            "map_region": None,  
+            "map_region": None,
             "tolerance": 17,
             # Add more default settings as needed
         }
