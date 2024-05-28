@@ -22,8 +22,8 @@ class FishBot(Thread):
         self.window_title = window_title
         self.stop_event = Event()
         self.game_window = focus_game_window(self.window_title)
-        self.fish_image = cv2.imread('images/fish.png')
         self.images = {
+            'fish': cv2.imread('images/fish.png'),
             'momeala': cv2.imread('images/momeala.png'),
             'fisherman': cv2.imread('images/pescar.png'),
             'buy': cv2.imread('images/buy.png'),
