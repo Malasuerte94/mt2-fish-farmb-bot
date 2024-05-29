@@ -89,7 +89,7 @@ class MessageDetector(Thread):
         cv2.imwrite(temp_file_path, self.img)
         
         with open(temp_file_path, 'rb') as photo:
-            bot.send_message(self.credentials['chat_id'], "Ai primit un mesaj nou!")
+            # bot.send_message(self.credentials['chat_id'], "Ai primit un mesaj nou!")
             bot.send_photo(self.credentials['chat_id'], photo)
             
         os.remove(temp_file_path)
