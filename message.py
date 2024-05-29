@@ -1,8 +1,13 @@
+import os
 from threading import Thread, Event
 import time
 
 import cv2
+import telebot
+import numpy as np
 from bot_logic import focus_game_window, take_screenshot
+from PIL import ImageGrab
+
 
 class MessageDetector(Thread):
     def __init__(self, game_title):
@@ -12,6 +17,11 @@ class MessageDetector(Thread):
         self.images = {
                 'message': cv2.imread('images/message.png')
             }
+        self.locations = {}
+        self.credentials = {
+            'bot_token': '7342586839:AAFPzwkYB1kskS7z3xiZI2FvynV7nzbMfJo',
+            'chat_id': '1299015292'
+        }
 
     def run(self):
         if not self.game_window:
@@ -29,7 +39,11 @@ class MessageDetector(Thread):
     def detect_message(self):
         screenshot = take_screenshot(self.game_window)
         if self.detect_image(screenshot, 'message', 0.8):
-                    print("Message detected")
+            print("Message detected")
+            self.img = self.ps_message()
+            self.send_telegram_message()
+            time.sleep(10)
+                    
                     
     def detect_image(self, image, name, threshold=0.8):
         gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -39,6 +53,41 @@ class MessageDetector(Thread):
         min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
 
         if max_val >= threshold:
-            #self.locations[name] = max_loc
+            self.locations = max_loc
             return True
         return False
+    
+    def ps_message(self):
+        left, top = self.locations
+        left += self.game_window.left
+        top += self.game_window.top
+        height = 100
+        width = 100
+        
+        center_x = left
+        center_y = top
+
+        bbox = (center_x - width // 2, center_y, center_x + width // 2, center_y + height // 2)
+        screenshot = np.array(ImageGrab.grab(bbox))
+        
+        img = cv2.cvtColor(screenshot, cv2.COLOR_RGB2BGR) 
+        
+        #for plotting image
+        # cv2.imshow('Captured Image', img) 
+        # cv2.waitKey(0)
+        # cv2.destroyAllWindows()
+        # # img = cv2.cvtColor(screenshot, cv2.COLOR_RGB2BGR)
+        return img
+
+    
+    def send_telegram_message(self):
+        bot = telebot.TeleBot(self.credentials['bot_token'])
+        
+        temp_file_path = "temp_screenshot.png"
+        cv2.imwrite(temp_file_path, self.img)
+        
+        with open(temp_file_path, 'rb') as photo:
+            bot.send_message(self.credentials['chat_id'], "Ai primit un mesaj nou!")
+            bot.send_photo(self.credentials['chat_id'], photo)
+            
+        os.remove(temp_file_path)
