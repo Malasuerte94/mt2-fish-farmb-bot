@@ -7,7 +7,9 @@ import telebot
 import numpy as np
 from bot_logic import focus_game_window, take_screenshot
 from PIL import ImageGrab
+from dotenv import load_dotenv
 
+load_dotenv()
 
 class MessageDetector(Thread):
     def __init__(self, game_title):
@@ -19,8 +21,8 @@ class MessageDetector(Thread):
             }
         self.locations = {}
         self.credentials = {
-            'bot_token': '7342586839:AAFPzwkYB1kskS7z3xiZI2FvynV7nzbMfJo',
-            'chat_id': '1299015292'
+            'bot_token': os.getenv('BOT_TOKEN'),
+            'chat_id': os.getenv('CHAT_ID')
         }
 
     def run(self):
