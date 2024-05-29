@@ -6,11 +6,13 @@ from bot_logic import set_setting, set_map_region, load_settings
 from fishbot import FishBot
 from overlay import MapSelectorOverlay
 from farmbot import FarmBot  # Make sure this is the correct path to your FarmBot class
+from message import MessageDetector
 
 # Global variables to hold the selected window and bot states
 selected_window = None
 fish_bot_running = False
 farm_bot_running = False
+message_detector_running = False
 
 # Load saved settings
 settings = load_settings()
@@ -19,7 +21,8 @@ map_region = settings.get('map_region', (1150, 50, 110, 110))
 
 def update_window_list():
     windows = gw.getAllTitles()
-    window_dropdown['values'] = windows
+    metin_windows = [window for window in windows if 'metin' in window.lower()]
+    window_dropdown['values'] = metin_windows
 
 def select_window(event):
     global selected_window
@@ -32,17 +35,30 @@ def select_window(event):
 # Initialize farm_bot variable
 farm_bot = None
 fish_bot = None
+message_detector = None
+
+def start_message_detector():
+    global selected_window, message_detector_running, message_detector
+    if not message_detector_running:
+        #window_dropdown.config(state="disabled")
+        message_detector_running = True
+        message_detector = MessageDetector(selected_window.title)
+        message_detector.start()
+    else:
+        print("Message Detector is already running.")
 
 def start_fish_bot():
     global selected_window, fish_bot_running, fish_bot
     if selected_window and not fish_bot_running:
-        print("Starting Fish Bot...")
         window_dropdown.config(state="disabled")
         fish_bot_running = True
         fish_bot = FishBot(selected_window.title)
         fish_bot.start()
+        start_message_detector()
     else:
         print("Please select a window.")
+
+
 
 def stop_fish_bot():
     global fish_bot_running, fish_bot
@@ -111,6 +127,7 @@ class PrintRedirector:
 # Create the main window
 root = tk.Tk()
 root.title("Bot Controller")
+root.geometry('+1200+100')
 
 # Define global variables for widgets
 tolerance_entry = None

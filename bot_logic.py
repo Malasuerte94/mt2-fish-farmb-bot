@@ -54,10 +54,10 @@ def ps_fish(window):
     left, top, width, height = window.left, window.top, window.width, window.height
     center_y = top + height // 2
     center_x = left + width // 2
-    bbox = (center_x - 150, center_y - 300, center_x + 150, center_y)
+    bbox = (center_x - 60, center_y - 60, center_x + 60, center_y + 60)
     screenshot = np.array(ImageGrab.grab(bbox))
     img = cv2.cvtColor(screenshot, cv2.COLOR_RGB2BGR)
-    # cv2.imshow('Captured Image', img)
+    # cv2.imshow('Captured Image', img) 
     # cv2.waitKey(0)
     # cv2.destroyAllWindows()
     # img = cv2.cvtColor(screenshot, cv2.COLOR_RGB2BGR)

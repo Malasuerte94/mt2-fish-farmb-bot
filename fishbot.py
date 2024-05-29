@@ -25,6 +25,7 @@ class FishBot(Thread):
         self.stop_event = Event()
         self.game_window = focus_game_window(self.window_title)
         self.images = {
+            'message': cv2.imread('images/message.png'),
             'fish': cv2.imread('images/fish.png'),
             'small_fish': cv2.imread('images/small_fish.png'),
             'fisherman': cv2.imread('images/pescar.png'),
@@ -39,13 +40,17 @@ class FishBot(Thread):
             'open5': cv2.imread('images/open5.png')
         }
         self.locations = {}
-        self.fishing_wait = 2.3
+        self.fishing_wait = 1.5
 
     def run(self):
         if not self.game_window:
             print(f"Could not find game window: {self.window_title}")
             return
 
+        print("Running FishBot module...")
+        # Testing screenshot offsets
+        # screenshot = ps_fish(self.game_window)
+        
         self.use_bait_or_fish()
         press_space()
 
@@ -77,18 +82,24 @@ class FishBot(Thread):
         gray_fish = cv2.cvtColor(self.images[name], cv2.COLOR_BGR2GRAY)
 
         best_match_val = float('-inf')
+        min_scale = 0.8
+        max_scale = 1.5
 
-        min_scale = 0.2
-        max_scale = 3.0
+        # Ensure the loop includes scale 1.0
+        template = self.images[name]
+        scales = np.linspace(min_scale, max_scale, 8)
+        if 1.0 not in scales:
+            scales = np.append(scales, 1.0)
 
-        for scale in np.linspace(min_scale, max_scale, 20):
-            resized_fish = cv2.resize(gray_fish, None, fx=scale, fy=scale)
-            result = cv2.matchTemplate(gray_image, resized_fish, cv2.TM_CCOEFF_NORMED)
+        for scale in scales:
+            resized_template = cv2.resize(template, None, fx=scale, fy=scale)
+            result = cv2.matchTemplate(image, resized_template, cv2.TM_CCOEFF_NORMED)
             min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
             if max_val > best_match_val:
                 best_match_val = max_val
+                best_match_loc = max_loc
 
-        threshold = 0.8
+        threshold = 0.9  # Increase the threshold for better accuracy
         return best_match_val >= threshold
 
     def detect_image(self, image, name, threshold=0.8):
