@@ -51,7 +51,8 @@ def start_fish_bot():
         fish_bot_running = True
         fish_bot = FishBot(selected_window.title)
         fish_bot.start()
-        start_message_detector()
+        if settings.get('tolerance', True):
+            start_message_detector()
     else:
         print("Please select a window.")
 
