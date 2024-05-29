@@ -1,27 +1,46 @@
 import json
-from threading import Event
-from bot_inputs.detect_mobs import ps_map
 import pygetwindow as gw
 import numpy as np
 import cv2
 import pyscreenshot as ImageGrab
 
-# Event to control the bot's running state
-stop_event = Event()
 
 # Global variable to hold map region
-map_region = (1150, 50, 110, 110)
+
+def update_window_list():
+    windows = gw.getAllTitles()
+    metin_windows = [window for window in windows if 'metin' in window.lower()]
+    return metin_windows
+
+
+def set_tolerance(tolerance):
+    set_setting('tolerance', tolerance)
+    print(f"Tolerance set to: {tolerance}")
+
+
+def set_gm_detector(state):
+    set_setting('gm_detector', state)
+    print(f"GM Detector set to: {state}")
+
+
+def set_pull_time(pull_time):
+    try:
+        pull_time_value = float(pull_time)
+        if 0.5 <= pull_time_value <= 3:
+            set_setting('pull_time', pull_time_value)
+            print(f"Pull Time set to: {pull_time_value}")
+        else:
+            print("Pull Time must be between 0.5 and 3 seconds.")
+    except ValueError:
+        print("Invalid input for Pull Time.")
 
 
 def set_map_region(region, selected_window):
-    global map_region
     map_region = region
 
-    # Capture the game window's position and dimensions
     game_window_position = selected_window.topleft
     game_window_dimensions = (selected_window.width, selected_window.height)
 
-    # Calculate the relative position of the map region
     relative_position = (
         map_region[0] - game_window_position[0] + 9,
         map_region[1] - game_window_position[1] + 29,
@@ -29,7 +48,6 @@ def set_map_region(region, selected_window):
         map_region[3]
     )
 
-    # Update the map region setting
     set_setting('map_region', relative_position)
     print(f"Map region set to: {map_region}")
 
@@ -54,10 +72,10 @@ def ps_fish(window):
     left, top, width, height = window.left, window.top, window.width, window.height
     center_y = top + height // 2
     center_x = left + width // 2
-    bbox = (center_x - 150, center_y - 300, center_x + 150, center_y)
+    bbox = (center_x - 60, center_y - 60, center_x + 60, center_y + 60)
     screenshot = np.array(ImageGrab.grab(bbox))
     img = cv2.cvtColor(screenshot, cv2.COLOR_RGB2BGR)
-    # cv2.imshow('Captured Image', img)
+    # cv2.imshow('Captured Image', img) 
     # cv2.waitKey(0)
     # cv2.destroyAllWindows()
     # img = cv2.cvtColor(screenshot, cv2.COLOR_RGB2BGR)
