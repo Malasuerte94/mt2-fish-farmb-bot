@@ -6,11 +6,14 @@ import numpy as np
 import cv2
 import pyscreenshot as ImageGrab
 
-# Event to control the bot's running state
-stop_event = Event()
-
 # Global variable to hold map region
 map_region = (1150, 50, 110, 110)
+
+
+def update_window_list():
+    windows = gw.getAllTitles()
+    metin_windows = [window for window in windows if 'metin' in window.lower()]
+    return metin_windows
 
 
 def set_map_region(region, selected_window):

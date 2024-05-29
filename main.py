@@ -2,7 +2,7 @@ import sys
 import tkinter as tk
 from tkinter import ttk
 import pygetwindow as gw
-from bot_logic import set_setting, set_map_region, load_settings
+from bot_logic import set_setting, set_map_region, load_settings, update_window_list
 from fishbot import FishBot
 from overlay import MapSelectorOverlay
 from farmbot import FarmBot  # Make sure this is the correct path to your FarmBot class
@@ -19,33 +19,32 @@ settings = load_settings()
 tolerance = settings.get('tolerance', 5)
 map_region = settings.get('map_region', (1150, 50, 110, 110))
 
-def update_window_list():
-    windows = gw.getAllTitles()
-    metin_windows = [window for window in windows if 'metin' in window.lower()]
-    window_dropdown['values'] = metin_windows
-
-def select_window(event):
-    global selected_window
-    for window in gw.getAllWindows():
-        if window.title == window_var.get():
-            selected_window = window
-            print(f"Selected window: {selected_window}")
-            break
-
-# Initialize farm_bot variable
+# Initialize Threads
 farm_bot = None
 fish_bot = None
 message_detector = None
 
+
 def start_message_detector():
     global selected_window, message_detector_running, message_detector
     if not message_detector_running:
-        #window_dropdown.config(state="disabled")
         message_detector_running = True
         message_detector = MessageDetector(selected_window.title)
         message_detector.start()
     else:
         print("Message Detector is already running.")
+
+
+def stop_message_detector():
+    global selected_window, message_detector_running, message_detector
+    if message_detector_running:
+        message_detector_running = False
+        message_detector.stop()
+        message_detector.join(timeout=1)
+        message_detector = None
+    else:
+        print("Message Detector is not running.")
+
 
 def start_fish_bot():
     global selected_window, fish_bot_running, fish_bot
@@ -59,7 +58,6 @@ def start_fish_bot():
         print("Please select a window.")
 
 
-
 def stop_fish_bot():
     global fish_bot_running, fish_bot
     if fish_bot_running:
@@ -71,7 +69,7 @@ def stop_fish_bot():
     else:
         print("Fish Bot is not running.")
 
-        
+
 def start_farm_bot():
     global selected_window, farm_bot_running, farm_bot
     if selected_window and not farm_bot_running:
@@ -87,6 +85,7 @@ def start_farm_bot():
         window_dropdown.config(state="disabled")
     else:
         print("Please select a window.")
+
 
 def stop_farm_bot():
     global farm_bot_running, farm_bot
@@ -104,6 +103,16 @@ def stop_farm_bot():
     else:
         print("Farm Bot is not running.")
 
+
+def select_window(event):
+    global selected_window
+    for window in gw.getAllWindows():
+        if window.title == window_var.get():
+            selected_window = window
+            print(f"Selected window: {selected_window}")
+            break
+
+
 def open_map_selector():
     global selected_window
     if selected_window:
@@ -112,6 +121,14 @@ def open_map_selector():
         MapSelectorOverlay(overlay, selected_window, game_window_position, set_map_region)
     else:
         print("Please select a window first.")
+
+
+def set_tolerance():
+    global tolerance
+    tolerance = tolerance_var.get()
+    set_setting('tolerance', tolerance)
+    print(f"Tolerance set to: {tolerance}")
+
 
 class PrintRedirector:
     def __init__(self, text_widget):
@@ -123,6 +140,7 @@ class PrintRedirector:
 
     def flush(self):
         pass
+
 
 # Create the main window
 root = tk.Tk()
@@ -140,7 +158,7 @@ window_var = tk.StringVar()
 window_dropdown = ttk.Combobox(root, textvariable=window_var)
 window_dropdown.grid(row=0, column=1, padx=10, pady=10)
 window_dropdown.bind("<<ComboboxSelected>>", select_window)
-update_window_list()
+window_dropdown['values'] = update_window_list()
 
 # Create tab control
 tab_control = ttk.Notebook(root)
@@ -168,12 +186,6 @@ tk.Label(farm_bot_tab, text="Tolerance:").grid(row=3, column=0, padx=10, pady=10
 tolerance_entry = tk.Entry(farm_bot_tab, textvariable=tolerance_var)
 tolerance_entry.grid(row=3, column=1, padx=10, pady=10)
 
-def set_tolerance():
-    global tolerance
-    tolerance = tolerance_var.get()
-    set_setting('tolerance', tolerance)
-    print(f"Tolerance set to: {tolerance}")
-
 set_tolerance_button = tk.Button(farm_bot_tab, text="Set Tolerance", command=set_tolerance)
 set_tolerance_button.grid(row=3, column=2, padx=10, pady=10)
 
@@ -188,7 +200,6 @@ mask_label.grid(row=5, column=0, padx=10, pady=10)
 # ps_map image label
 ps_label = tk.Label(farm_bot_tab)
 ps_label.grid(row=5, column=1, padx=10, pady=10)
-
 
 # Log output text widget
 log_output = tk.Text(root, height=10, wrap='word', state='normal')
