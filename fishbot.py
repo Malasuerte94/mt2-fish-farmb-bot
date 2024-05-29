@@ -7,7 +7,7 @@ from pywinauto.mouse import click
 import random
 from pywinauto.keyboard import send_keys
 from threading import Thread, Event
-from bot_logic import focus_game_window, ps_fish, take_screenshot
+from bot_logic import focus_game_window, ps_fish, take_screenshot, load_settings
 
 
 def press_space():
@@ -16,6 +16,9 @@ def press_space():
     print(f"Hit Space")
     time.sleep(press_duration)
     send_keys('{SPACE up}')
+
+
+settings = load_settings()
 
 
 class FishBot(Thread):
@@ -40,7 +43,7 @@ class FishBot(Thread):
             'open5': cv2.imread('images/open5.png')
         }
         self.locations = {}
-        self.fishing_wait = 1.5
+        self.fishing_wait = settings.get('pull_time', 1.3)
 
     def run(self):
         if not self.game_window:
@@ -50,7 +53,7 @@ class FishBot(Thread):
         print("Running FishBot module...")
         # Testing screenshot offsets
         # screenshot = ps_fish(self.game_window)
-        
+
         self.use_bait_or_fish()
         press_space()
 
