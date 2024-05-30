@@ -1,4 +1,5 @@
 import json
+import mss
 import pygetwindow as gw
 import numpy as np
 import cv2
@@ -72,16 +73,20 @@ def ps_fish(window):
     left, top, width, height = window.left, window.top, window.width, window.height
     center_y = top + height // 2
     center_x = left + width // 2
-    bbox = (center_x - 20, center_y - 20, center_x + 20, center_y + 20)
-    screenshot = np.array(ImageGrab.grab(bbox))
-    gray_image = cv2.cvtColor(screenshot, cv2.COLOR_BGR2GRAY)
-    img = cv2.resize(gray_image, (0, 0), fx=0.5, fy=0.5)
-
-    # cv2.imshow('Captured Image', img) 
-    # cv2.waitKey(0)
-    # cv2.destroyAllWindows()
-    # img = cv2.cvtColor(screenshot, cv2.COLOR_RGB2BGR)
-    return img
+    bbox = {
+        'left': center_x - 20,
+        'top': center_y - 20,
+        'width': 40,
+        'height': 40
+    }
+    
+    with mss.mss() as sct:
+        screenshot = sct.grab(bbox)
+        img = np.array(screenshot)
+        gray_image = cv2.cvtColor(img, cv2.COLOR_BGRA2GRAY)  # Note: BGRA format from mss
+        resized_img = cv2.resize(gray_image, (0, 0), fx=0.5, fy=0.5)
+    
+    return resized_img
 
 
 def take_screenshot(window):
