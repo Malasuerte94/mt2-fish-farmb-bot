@@ -63,8 +63,19 @@ class FishBot(Thread):
         while not self.stop_event.is_set():
             screenshot = ps_fish(self.game_window)
             if self.detect_fish(screenshot):
-                print("Fish detected")
-                self.fish_catch()
+                print("-- Fish detected --")
+                detection_start_time = time.time()
+
+                # Continue to detect how long the fish is on the screen
+                while self.detect_fish(ps_fish(self.game_window)):
+                    time.sleep(0.01)  # Slight delay to avoid too frequent screenshots
+
+                detection_end_time = time.time()
+                detection_duration = detection_end_time - detection_start_time
+                print(f"Fish was detected for {detection_duration:.2f} seconds")
+                
+                
+                self.fish_catch(detection_duration)
                 time.sleep(5)
                 self.use_bait_or_fish()
                 press_space()
@@ -99,9 +110,16 @@ class FishBot(Thread):
             return True
         return False
 
-    def fish_catch(self):
-        time.sleep(self.fishing_wait)
+    def fish_catch(self, time_to_wait):
+        wait_start_time = time.time()
+        time.sleep(self.fishing_wait - time_to_wait)
+        wait_end_time = time.time()
+        wait_duration = wait_end_time - wait_start_time
+        print(f"Waited {wait_duration:.2f} seconds")
         press_space()
+        wait_end_time2 = time.time()
+        wait_duration2 = wait_end_time2 - wait_start_time
+        print(f"Waited {wait_duration2:.2f} seconds")
         print("Finished fishing")
 
     def use_bait_or_fish(self):

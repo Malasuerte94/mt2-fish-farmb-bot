@@ -188,7 +188,7 @@ gm_detector_checkbox = ttk.Checkbutton(fish_bot_tab, text="GM Detector", variabl
 gm_detector_checkbox.grid(row=2, column=0, padx=10, pady=10, sticky='w')
 
 # Pull Time input and set button
-ttk.Label(fish_bot_tab, text="Pull Time (0.5 to 3 seconds):").grid(row=3, column=0, padx=10, pady=10, sticky='w')
+ttk.Label(fish_bot_tab, text="Pull Time (0.5 to 5 seconds):").grid(row=3, column=0, padx=10, pady=10, sticky='w')
 pull_time_var = tk.StringVar(value=str(settings.get('pull_time', 1.0)))
 pull_time_entry = ttk.Entry(fish_bot_tab, textvariable=pull_time_var)
 pull_time_entry.grid(row=3, column=1, padx=10, pady=10, sticky='w')

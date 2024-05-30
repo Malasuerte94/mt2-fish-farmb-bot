@@ -27,11 +27,11 @@ def set_gm_detector(state):
 def set_pull_time(pull_time):
     try:
         pull_time_value = float(pull_time)
-        if 0.5 <= pull_time_value <= 3:
+        if 0.5 <= pull_time_value <= 5:
             set_setting('pull_time', pull_time_value)
             print(f"Pull Time set to: {pull_time_value}")
         else:
-            print("Pull Time must be between 0.5 and 3 seconds.")
+            print("Pull Time must be between 0.5 and 5 seconds.")
     except ValueError:
         print("Invalid input for Pull Time.")
 
