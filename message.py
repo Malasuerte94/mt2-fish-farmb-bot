@@ -90,6 +90,6 @@ class MessageDetector(Thread):
         
         with open(temp_file_path, 'rb') as photo:
             # bot.send_message(self.credentials['chat_id'], "Ai primit un mesaj nou!")
-            bot.send_photo(self.credentials['chat_id'], photo)
+            bot.send_photo(self.credentials['chat_id'], photo, caption="Mesaj nou!")
             
         os.remove(temp_file_path)
