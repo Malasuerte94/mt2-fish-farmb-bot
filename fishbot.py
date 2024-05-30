@@ -12,8 +12,8 @@ import matplotlib.pyplot as plt
 
 def press_space():
     send_keys('{SPACE down}')
-    press_duration = random.uniform(0.2, 0.4)
-    print(f"Hit Space")
+    press_duration = random.uniform(0.1, 0.2)
+    print("Hit Space")
     time.sleep(press_duration)
     send_keys('{SPACE up}')
 
@@ -63,10 +63,9 @@ class FishBot(Thread):
         while not self.stop_event.is_set():
             screenshot = ps_fish(self.game_window)
             if self.detect_fish(screenshot):
-                self.fishing_wait = settings.get('pull_time', 3)
                 print("Fish detected")
                 self.fish_catch()
-                time.sleep(5)
+                time.sleep(4)
                 self.use_bait_or_fish()
                 press_space()
                 last_detection_time = time.time()
@@ -76,7 +75,7 @@ class FishBot(Thread):
                     last_detection_time = time.time()
                     self.use_bait_or_fish()
                     press_space()
-            time.sleep(0.05)
+            time.sleep(0.1)
 
     def stop(self):
         self.stop_event.set()
@@ -101,6 +100,7 @@ class FishBot(Thread):
         return False
 
     def fish_catch(self):
+        self.fishing_wait = settings.get('pull_time', 3)
         time.sleep(self.fishing_wait)
         press_space()
         print("Finished fishing")

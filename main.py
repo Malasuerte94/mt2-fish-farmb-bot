@@ -52,7 +52,7 @@ def start_fish_bot():
         fish_bot_running = True
         fish_bot = FishBot(selected_window.title)
         fish_bot.start()
-        if settings.get('tolerance', True):
+        if settings.get('gm_detector', True):
             start_message_detector()
     else:
         print("Please select a window.")
@@ -66,6 +66,7 @@ def stop_fish_bot():
         fish_bot.stop()
         fish_bot.join(timeout=1)
         fish_bot = None
+        stop_message_detector()
     else:
         print("Fish Bot is not running.")
 
@@ -189,7 +190,7 @@ gm_detector_checkbox.grid(row=2, column=0, padx=10, pady=10, sticky='w')
 
 # Pull Time input and set button
 ttk.Label(fish_bot_tab, text="Pull Time (0.5 to 5 seconds):").grid(row=3, column=0, padx=10, pady=10, sticky='w')
-pull_time_var = tk.StringVar(value=str(settings.get('pull_time', 1.0)))
+pull_time_var = tk.StringVar(value=str(settings.get('pull_time', 3.0)))
 pull_time_entry = ttk.Entry(fish_bot_tab, textvariable=pull_time_var)
 pull_time_entry.grid(row=3, column=1, padx=10, pady=10, sticky='w')
 
