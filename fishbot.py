@@ -18,9 +18,6 @@ def press_space():
     send_keys('{SPACE up}')
 
 
-settings = load_settings()
-
-
 class FishBot(Thread):
     def __init__(self, window_title):
         super().__init__()
@@ -43,7 +40,7 @@ class FishBot(Thread):
             'open5': cv2.imread('images/open5.png')
         }
         self.locations = {}
-        self.fishing_wait = settings.get('pull_time', 1.3)
+
 
     def run(self):
         if not self.game_window:
@@ -63,7 +60,7 @@ class FishBot(Thread):
         while not self.stop_event.is_set():
             screenshot = ps_fish(self.game_window)
             if self.detect_fish(screenshot):
-                print("Fish detected")
+                print("-- Fish detected --")
                 self.fish_catch()
                 time.sleep(4)
                 self.use_bait_or_fish()
@@ -100,10 +97,12 @@ class FishBot(Thread):
         return False
 
     def fish_catch(self):
-        self.fishing_wait = settings.get('pull_time', 3)
-        time.sleep(self.fishing_wait)
+        settings = load_settings()
+        pull_time = settings.get('pull_time', 3)
+        print(f"Pull in {pull_time}")
+        time.sleep(pull_time)
         press_space()
-        print("Finished fishing")
+        print("-- Finished --")
 
     def use_bait_or_fish(self):
         screenshot = take_screenshot(self.game_window)
