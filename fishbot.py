@@ -6,7 +6,7 @@ import pyautogui
 from pywinauto.mouse import click
 import random
 from pywinauto.keyboard import send_keys
-from threading import Thread, Event
+from threading import Thread, Event, Lock
 from bot_logic import focus_game_window, ps_fish, take_screenshot, load_settings
 import matplotlib.pyplot as plt
 
@@ -20,6 +20,28 @@ def press_space():
 
 settings = load_settings()
 
+
+class FishDetector(Thread):
+    def __init__(self, game_window, stop_event, detection_result, lock):
+        super().__init__()
+        self.game_window = game_window
+        self.stop_event = stop_event
+        self.detection_result = detection_result
+        self.lock = lock
+
+    def run(self):
+        while not self. stop_event.is_set():
+            screenshot = ps_fish(self.game_window)
+            fish_detected = self.detect_fish(screenshot)
+            with self.lock:
+                self.detection_result['fish_detected'] = fish_detected
+
+    def detect_fish(self, image):
+        _, binary_image = cv2.threshold(image, 240, 255, cv2.THRESH_BINARY)
+        contours, _ = cv2.findContours(binary_image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        filtered_contours = [cnt for cnt in contours if 1 <= cv2.boundingRect(cnt)[2] <= 15 and 1 <= cv2.boundingRect(cnt)[3] <= 15]
+        return len(filtered_contours) > 0
+    
 
 class FishBot(Thread):
     def __init__(self, window_title):
@@ -44,6 +66,12 @@ class FishBot(Thread):
         }
         self.locations = {}
         self.fishing_wait = settings.get('pull_time', 1.3)
+        self.detection_result = {'fish_detected': False}
+        self.lock = Lock()
+        
+        # Initialize and start the FishDetector thread
+        self.fish_detector = FishDetector(self.game_window, self.stop_event, self.detection_result, self.lock)
+        self.fish_detector.start()
 
     def run(self):
         if not self.game_window:
@@ -61,8 +89,9 @@ class FishBot(Thread):
         detection_timeout = 30
 
         while not self.stop_event.is_set():
-            screenshot = ps_fish(self.game_window)
-            if self.detect_fish(screenshot, 'fish'):
+            with self.lock:
+                fish_detected = self.detection_result['fish_detected']
+            if fish_detected:
                 print("Fish detected")
                 self.fish_catch()
                 time.sleep(5)
@@ -79,15 +108,7 @@ class FishBot(Thread):
 
     def stop(self):
         self.stop_event.set()
-
-    def detect_fish(self, image, name):
-        resized_image = cv2.resize(image, (0, 0), fx=0.5, fy=0.5)
-        gray_image = cv2.cvtColor(resized_image, cv2.COLOR_BGR2GRAY)
-        _, binary_image = cv2.threshold(gray_image, 240, 255, cv2.THRESH_BINARY)
-        contours, _ = cv2.findContours(binary_image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        filtered_contours = [cnt for cnt in contours if 1 <= cv2.boundingRect(cnt)[2] <= 15 and 1 <= cv2.boundingRect(cnt)[3] <= 15]
-        
-        return len(filtered_contours) > 0
+        self.fish_detector.join()
 
     def detect_image(self, image, name, threshold=0.8):
         gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
