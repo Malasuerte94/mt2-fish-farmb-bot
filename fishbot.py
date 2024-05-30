@@ -63,6 +63,7 @@ class FishBot(Thread):
         while not self.stop_event.is_set():
             screenshot = ps_fish(self.game_window)
             if self.detect_fish(screenshot):
+                self.fishing_wait = settings.get('pull_time', 3)
                 print("Fish detected")
                 self.fish_catch()
                 time.sleep(5)
@@ -83,7 +84,7 @@ class FishBot(Thread):
     def detect_fish(self, image):
         _, binary_image = cv2.threshold(image, 240, 255, cv2.THRESH_BINARY)
         contours, _ = cv2.findContours(binary_image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        filtered_contours = [cnt for cnt in contours if 1 <= cv2.boundingRect(cnt)[2] <= 15 and 1 <= cv2.boundingRect(cnt)[3] <= 15]
+        filtered_contours = [cnt for cnt in contours if 2 <= cv2.boundingRect(cnt)[2] <= 15 and 2 <= cv2.boundingRect(cnt)[3] <= 15]
         
         return len(filtered_contours) > 0
 
