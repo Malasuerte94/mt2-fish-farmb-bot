@@ -12,13 +12,10 @@ import matplotlib.pyplot as plt
 
 def press_space():
     send_keys('{SPACE down}')
-    press_duration = random.uniform(0.2, 0.4)
-    print(f"Hit Space")
+    press_duration = random.uniform(0.1, 0.2)
+    print("Hit Space")
     time.sleep(press_duration)
     send_keys('{SPACE up}')
-
-
-settings = load_settings()
 
 
 class FishBot(Thread):
@@ -43,7 +40,7 @@ class FishBot(Thread):
             'open5': cv2.imread('images/open5.png')
         }
         self.locations = {}
-        self.fishing_wait = settings.get('pull_time', 1.3)
+
 
     def run(self):
         if not self.game_window:
@@ -76,7 +73,8 @@ class FishBot(Thread):
                 
                 
                 self.fish_catch(detection_duration)
-                time.sleep(5)
+                time.sleep(4)
+
                 self.use_bait_or_fish()
                 press_space()
                 last_detection_time = time.time()
@@ -86,7 +84,7 @@ class FishBot(Thread):
                     last_detection_time = time.time()
                     self.use_bait_or_fish()
                     press_space()
-            time.sleep(0.05)
+            time.sleep(0.1)
 
     def stop(self):
         self.stop_event.set()
@@ -94,7 +92,7 @@ class FishBot(Thread):
     def detect_fish(self, image):
         _, binary_image = cv2.threshold(image, 240, 255, cv2.THRESH_BINARY)
         contours, _ = cv2.findContours(binary_image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        filtered_contours = [cnt for cnt in contours if 1 <= cv2.boundingRect(cnt)[2] <= 15 and 1 <= cv2.boundingRect(cnt)[3] <= 15]
+        filtered_contours = [cnt for cnt in contours if 2 <= cv2.boundingRect(cnt)[2] <= 15 and 2 <= cv2.boundingRect(cnt)[3] <= 15]
         
         return len(filtered_contours) > 0
 
@@ -110,17 +108,14 @@ class FishBot(Thread):
             return True
         return False
 
+
     def fish_catch(self, time_to_wait):
-        wait_start_time = time.time()
-        time.sleep(self.fishing_wait - time_to_wait)
-        wait_end_time = time.time()
-        wait_duration = wait_end_time - wait_start_time
-        print(f"Waited {wait_duration:.2f} seconds")
+        settings = load_settings()
+        pull_time = settings.get('pull_time', 3)
+        print(f"Pull in {pull_time}")
+        time.sleep(pull_time)
         press_space()
-        wait_end_time2 = time.time()
-        wait_duration2 = wait_end_time2 - wait_start_time
-        print(f"Waited {wait_duration2:.2f} seconds")
-        print("Finished fishing")
+        print("-- Finished --")
 
     def use_bait_or_fish(self):
         screenshot = take_screenshot(self.game_window)

@@ -3,8 +3,6 @@ import mss
 import pygetwindow as gw
 import numpy as np
 import cv2
-import pyscreenshot as ImageGrab
-
 
 # Global variable to hold map region
 
@@ -83,7 +81,7 @@ def ps_fish(window):
     with mss.mss() as sct:
         screenshot = sct.grab(bbox)
         img = np.array(screenshot)
-        gray_image = cv2.cvtColor(img, cv2.COLOR_BGRA2GRAY)  # Note: BGRA format from mss
+        gray_image = cv2.cvtColor(img, cv2.COLOR_BGRA2GRAY)
         resized_img = cv2.resize(gray_image, (0, 0), fx=0.5, fy=0.5)
     
     return resized_img
@@ -91,8 +89,18 @@ def ps_fish(window):
 
 def take_screenshot(window):
     left, top, width, height = window.left, window.top, window.width, window.height
-    screenshot = np.array(ImageGrab.grab(bbox=(left, top, left + width, top + height)))
-    img = cv2.cvtColor(screenshot, cv2.COLOR_RGB2BGR)
+    bbox = {
+        'left': left,
+        'top': top,
+        'width': width,
+        'height': height
+    }
+    
+    with mss.mss() as sct:
+        screenshot = sct.grab(bbox)
+        img = np.array(screenshot)
+        img = cv2.cvtColor(img, cv2.COLOR_BGRA2BGR)
+    
     return img
 
 
