@@ -8,7 +8,7 @@ import random
 from pywinauto.keyboard import send_keys
 from threading import Thread, Event
 from bot_logic import focus_game_window, ps_fish, take_screenshot, load_settings
-
+import matplotlib.pyplot as plt
 
 def press_space():
     send_keys('{SPACE down}')
@@ -81,29 +81,13 @@ class FishBot(Thread):
         self.stop_event.set()
 
     def detect_fish(self, image, name):
-        gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        gray_fish = cv2.cvtColor(self.images[name], cv2.COLOR_BGR2GRAY)
-
-        best_match_val = float('-inf')
-        min_scale = 0.8
-        max_scale = 1.5
-
-        # Ensure the loop includes scale 1.0
-        template = self.images[name]
-        scales = np.linspace(min_scale, max_scale, 8)
-        if 1.0 not in scales:
-            scales = np.append(scales, 1.0)
-
-        for scale in scales:
-            resized_template = cv2.resize(template, None, fx=scale, fy=scale)
-            result = cv2.matchTemplate(image, resized_template, cv2.TM_CCOEFF_NORMED)
-            min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
-            if max_val > best_match_val:
-                best_match_val = max_val
-                best_match_loc = max_loc
-
-        threshold = 0.9  # Increase the threshold for better accuracy
-        return best_match_val >= threshold
+        resized_image = cv2.resize(image, (0, 0), fx=0.5, fy=0.5)
+        gray_image = cv2.cvtColor(resized_image, cv2.COLOR_BGR2GRAY)
+        _, binary_image = cv2.threshold(gray_image, 240, 255, cv2.THRESH_BINARY)
+        contours, _ = cv2.findContours(binary_image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        filtered_contours = [cnt for cnt in contours if 1 <= cv2.boundingRect(cnt)[2] <= 15 and 1 <= cv2.boundingRect(cnt)[3] <= 15]
+        
+        return len(filtered_contours) > 0
 
     def detect_image(self, image, name, threshold=0.8):
         gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -203,4 +187,4 @@ class FishBot(Thread):
     def move_mouse_back(self):
         game_center_x = self.game_window.left + self.game_window.width // 2
         game_center_y = self.game_window.top + self.game_window.height // 2
-        pyautogui.moveTo(game_center_x, game_center_y, 0.2)
+        pyautogui.moveTo(game_center_x // 2, game_center_y // 2, 0.2)

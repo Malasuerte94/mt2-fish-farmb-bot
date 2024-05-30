@@ -138,7 +138,6 @@ class PrintRedirector:
 # Create the main window
 root = tk.Tk()
 root.title("Bot Controller")
-root.geometry('+1200+100')
 root.resizable(False, False)  # Disable window resizing
 root.configure(bg="grey")
 
