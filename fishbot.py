@@ -1,7 +1,6 @@
 import cv2
 import time
 
-import numpy as np
 import pyautogui
 from pywinauto.mouse import click
 import random
@@ -48,8 +47,6 @@ class FishBot(Thread):
             return
 
         print("Running FishBot module...")
-        # Testing screenshot offsets
-        # screenshot = ps_fish(self.game_window)
 
         self.use_bait_or_fish()
         press_space()
@@ -63,18 +60,15 @@ class FishBot(Thread):
                 print("-- Fish detected --")
                 detection_start_time = time.time()
 
-                # Continue to detect how long the fish is on the screen
                 while self.detect_fish(ps_fish(self.game_window)):
-                    time.sleep(0.01)  # Slight delay to avoid too frequent screenshots
+                    time.sleep(0.1)
 
                 detection_end_time = time.time()
                 detection_duration = detection_end_time - detection_start_time
                 print(f"Fish was detected for {detection_duration:.2f} seconds")
                 
-                
-                self.fish_catch(detection_duration)
+                self.fish_catch()
                 time.sleep(4)
-
                 self.use_bait_or_fish()
                 press_space()
                 last_detection_time = time.time()
@@ -109,9 +103,9 @@ class FishBot(Thread):
         return False
 
 
-    def fish_catch(self, time_to_wait):
+    def fish_catch(self):
         settings = load_settings()
-        pull_time = settings.get('pull_time', 3)
+        pull_time = settings.get('pull_time', 2.3)
         print(f"Pull in {pull_time}")
         time.sleep(pull_time)
         press_space()
