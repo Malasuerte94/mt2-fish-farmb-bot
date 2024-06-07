@@ -109,7 +109,7 @@ class FishBot(Thread):
         return False
 
 
-    def fish_catch(self, time_to_wait):
+    def fish_catch(self):
         settings = load_settings()
         pull_time = settings.get('pull_time', 3)
         start = time.time()
