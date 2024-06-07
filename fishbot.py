@@ -112,8 +112,10 @@ class FishBot(Thread):
     def fish_catch(self, time_to_wait):
         settings = load_settings()
         pull_time = settings.get('pull_time', 3)
-        print(f"Pull in {pull_time}")
+        start = time.time()
         time.sleep(pull_time)
+        end = time.time()
+        print(f"Waited {end - start} seconds")
         press_space()
         print("-- Finished --")
 
