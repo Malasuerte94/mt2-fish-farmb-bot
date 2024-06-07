@@ -72,7 +72,7 @@ class FishBot(Thread):
                 print(f"Fish was detected for {detection_duration:.2f} seconds")
                 
                 
-                self.fish_catch(detection_duration)
+                self.fish_catch()
                 time.sleep(4)
 
                 self.use_bait_or_fish()
