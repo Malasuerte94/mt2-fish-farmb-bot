@@ -8,17 +8,14 @@ import random
 from pywinauto.keyboard import send_keys
 from threading import Thread, Event
 from bot_logic import focus_game_window, ps_fish, take_screenshot, load_settings
-
+import matplotlib.pyplot as plt
 
 def press_space():
     send_keys('{SPACE down}')
-    press_duration = random.uniform(0.2, 0.4)
-    print(f"Hit Space")
+    press_duration = random.uniform(0.1, 0.2)
+    print("Hit Space")
     time.sleep(press_duration)
     send_keys('{SPACE up}')
-
-
-settings = load_settings()
 
 
 class FishBot(Thread):
@@ -43,7 +40,7 @@ class FishBot(Thread):
             'open5': cv2.imread('images/open5.png')
         }
         self.locations = {}
-        self.fishing_wait = settings.get('pull_time', 1.3)
+
 
     def run(self):
         if not self.game_window:
@@ -62,10 +59,22 @@ class FishBot(Thread):
 
         while not self.stop_event.is_set():
             screenshot = ps_fish(self.game_window)
-            if self.detect_fish(screenshot, 'fish'):
-                print("Fish detected")
+            if self.detect_fish(screenshot):
+                print("-- Fish detected --")
+                detection_start_time = time.time()
+
+                # Continue to detect how long the fish is on the screen
+                while self.detect_fish(ps_fish(self.game_window)):
+                    time.sleep(0.01)  # Slight delay to avoid too frequent screenshots
+
+                detection_end_time = time.time()
+                detection_duration = detection_end_time - detection_start_time
+                print(f"Fish was detected for {detection_duration:.2f} seconds")
+                
+                
                 self.fish_catch()
-                time.sleep(5)
+                time.sleep(4)
+
                 self.use_bait_or_fish()
                 press_space()
                 last_detection_time = time.time()
@@ -75,35 +84,17 @@ class FishBot(Thread):
                     last_detection_time = time.time()
                     self.use_bait_or_fish()
                     press_space()
-            time.sleep(0.01)
+            time.sleep(0.1)
 
     def stop(self):
         self.stop_event.set()
 
-    def detect_fish(self, image, name):
-        gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        gray_fish = cv2.cvtColor(self.images[name], cv2.COLOR_BGR2GRAY)
-
-        best_match_val = float('-inf')
-        min_scale = 0.8
-        max_scale = 1.5
-
-        # Ensure the loop includes scale 1.0
-        template = self.images[name]
-        scales = np.linspace(min_scale, max_scale, 8)
-        if 1.0 not in scales:
-            scales = np.append(scales, 1.0)
-
-        for scale in scales:
-            resized_template = cv2.resize(template, None, fx=scale, fy=scale)
-            result = cv2.matchTemplate(image, resized_template, cv2.TM_CCOEFF_NORMED)
-            min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
-            if max_val > best_match_val:
-                best_match_val = max_val
-                best_match_loc = max_loc
-
-        threshold = 0.9  # Increase the threshold for better accuracy
-        return best_match_val >= threshold
+    def detect_fish(self, image):
+        _, binary_image = cv2.threshold(image, 240, 255, cv2.THRESH_BINARY)
+        contours, _ = cv2.findContours(binary_image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        filtered_contours = [cnt for cnt in contours if 2 <= cv2.boundingRect(cnt)[2] <= 15 and 2 <= cv2.boundingRect(cnt)[3] <= 15]
+        
+        return len(filtered_contours) > 0
 
     def detect_image(self, image, name, threshold=0.8):
         gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -117,10 +108,16 @@ class FishBot(Thread):
             return True
         return False
 
+
     def fish_catch(self):
-        time.sleep(self.fishing_wait)
+        settings = load_settings()
+        pull_time = settings.get('pull_time', 3)
+        start = time.time()
+        time.sleep(pull_time)
+        end = time.time()
+        print(f"Waited {end - start} seconds")
         press_space()
-        print("Finished fishing")
+        print("-- Finished --")
 
     def use_bait_or_fish(self):
         screenshot = take_screenshot(self.game_window)
@@ -203,4 +200,4 @@ class FishBot(Thread):
     def move_mouse_back(self):
         game_center_x = self.game_window.left + self.game_window.width // 2
         game_center_y = self.game_window.top + self.game_window.height // 2
-        pyautogui.moveTo(game_center_x, game_center_y, 0.2)
+        pyautogui.moveTo(game_center_x // 2, game_center_y // 2, 0.2)

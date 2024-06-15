@@ -1,9 +1,8 @@
 import json
+import mss
 import pygetwindow as gw
 import numpy as np
 import cv2
-import pyscreenshot as ImageGrab
-
 
 # Global variable to hold map region
 
@@ -26,11 +25,11 @@ def set_gm_detector(state):
 def set_pull_time(pull_time):
     try:
         pull_time_value = float(pull_time)
-        if 0.5 <= pull_time_value <= 3:
+        if 0.5 <= pull_time_value <= 5:
             set_setting('pull_time', pull_time_value)
             print(f"Pull Time set to: {pull_time_value}")
         else:
-            print("Pull Time must be between 0.5 and 3 seconds.")
+            print("Pull Time must be between 0.5 and 5 seconds.")
     except ValueError:
         print("Invalid input for Pull Time.")
 
@@ -72,20 +71,36 @@ def ps_fish(window):
     left, top, width, height = window.left, window.top, window.width, window.height
     center_y = top + height // 2
     center_x = left + width // 2
-    bbox = (center_x - 60, center_y - 60, center_x + 60, center_y + 60)
-    screenshot = np.array(ImageGrab.grab(bbox))
-    img = cv2.cvtColor(screenshot, cv2.COLOR_RGB2BGR)
-    # cv2.imshow('Captured Image', img) 
-    # cv2.waitKey(0)
-    # cv2.destroyAllWindows()
-    # img = cv2.cvtColor(screenshot, cv2.COLOR_RGB2BGR)
-    return img
+    bbox = {
+        'left': center_x - 20,
+        'top': center_y - 20,
+        'width': 40,
+        'height': 40
+    }
+    
+    with mss.mss() as sct:
+        screenshot = sct.grab(bbox)
+        img = np.array(screenshot)
+        gray_image = cv2.cvtColor(img, cv2.COLOR_BGRA2GRAY)
+        resized_img = cv2.resize(gray_image, (0, 0), fx=0.5, fy=0.5)
+    
+    return resized_img
 
 
 def take_screenshot(window):
     left, top, width, height = window.left, window.top, window.width, window.height
-    screenshot = np.array(ImageGrab.grab(bbox=(left, top, left + width, top + height)))
-    img = cv2.cvtColor(screenshot, cv2.COLOR_RGB2BGR)
+    bbox = {
+        'left': left,
+        'top': top,
+        'width': width,
+        'height': height
+    }
+    
+    with mss.mss() as sct:
+        screenshot = sct.grab(bbox)
+        img = np.array(screenshot)
+        img = cv2.cvtColor(img, cv2.COLOR_BGRA2BGR)
+    
     return img
 
 

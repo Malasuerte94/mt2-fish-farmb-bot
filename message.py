@@ -5,6 +5,7 @@ import time
 import cv2
 import telebot
 import numpy as np
+import matplotlib.pyplot as plt
 from bot_logic import focus_game_window, take_screenshot
 from PIL import ImageGrab
 from dotenv import load_dotenv
@@ -42,17 +43,20 @@ class MessageDetector(Thread):
         self.stop_event.set()
 
     def detect_message(self):
-        screenshot = take_screenshot(self.game_window)
-        if self.detect_image(screenshot, 'message', 0.8):
+        #screenshot = take_screenshot(self.game_window)
+        self.img = self.take_message_screenshot(self.game_window)
+        if self.detect_image(self.img, 'message', 0.8):
             print("Message detected")
-            self.img = self.ps_message()
-            self.send_telegram_message()
+            #self.img = self.ps_message()
+            self.send_telegram_message("Mesaj privat detectat!")
             time.sleep(10)
 
     def detect_local_message(self):
         screenshot = take_screenshot(self.game_window)
         if self.detect_image(screenshot, 'local_gm', 0.8):
             print("Message local detected")
+            self.img = self.ps_message()
+            self.send_telegram_message("Mesaj pe chat detectat!")
             time.sleep(10)
 
     def detect_image(self, image, name, threshold=0.8):
@@ -67,6 +71,18 @@ class MessageDetector(Thread):
             return True
         return False
 
+    def take_message_screenshot(self, window):
+        bbox = (window.width - 100, window.top + 200, window.width, window.height - 300)
+        img = np.array(ImageGrab.grab(bbox))
+        img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+         
+        # plt.imshow(img, cmap='gray')  # Use cmap='gray' for grayscale images
+        # plt.axis('off')  # Hide the axis
+        # plt.show()
+        
+        return img
+
+    #not used anymore
     def ps_message(self):
         left, top = self.locations
         left += self.game_window.left
@@ -89,7 +105,7 @@ class MessageDetector(Thread):
         # # img = cv2.cvtColor(screenshot, cv2.COLOR_RGB2BGR)
         return img
 
-    def send_telegram_message(self):
+    def send_telegram_message(self, message="Mesaj nou!"):
         bot = telebot.TeleBot(self.credentials['bot_token'])
 
         temp_file_path = "temp_screenshot.png"
@@ -97,6 +113,7 @@ class MessageDetector(Thread):
 
         with open(temp_file_path, 'rb') as photo:
             # bot.send_message(self.credentials['chat_id'], "Ai primit un mesaj nou!")
-            bot.send_photo(self.credentials['chat_id'], photo)
-
+            bot.send_photo(self.credentials['chat_id'], photo, caption={message})
+            
         os.remove(temp_file_path)
+
